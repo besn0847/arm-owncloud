@@ -3,9 +3,8 @@ FROM hypriot/rpi-alpine-scratch
 RUN apk update && \
 	apk add owncloud-sqlite nginx php-fpm php-curl supervisor && \
 	mkdir /data /etc/nginx/sites-available /etc/nginx/sites-enabled && \
-	mv /var/lib/owncloud/data /var/lib/owncloud/data.orig && \
-	ln -s /data /var/lib/owncloud/data && \
-	cp -rf /var/lib/owncloud/data.orig/* /data/	
+	rm -rf /var/lib/owncloud/data && \ 
+	ln -s /data /var/lib/owncloud/data
 
 ADD ./etc/ssl/ /etc/ssl/
 ADD ./etc/nginx/nginx.conf /etc/nginx/nginx.conf
