@@ -1,0 +1,44 @@
+server {
+        #listen       [::]:80; #uncomment for IPv6 support
+        listen       80;
+	return 301 https://$host$request_uri;
+	server_name owncloud;
+}
+
+server {
+        #listen       [::]:443 ssl; #uncomment for IPv6 support
+        listen       443 ssl;
+        server_name  owncloud;
+
+	root /var/www/owncloud/www;
+        index  index.php index.html index.htm;
+	disable_symlinks off;
+
+        ssl_certificate      /etc/ssl/cert.pem;
+        ssl_certificate_key  /etc/ssl/key.pem;
+
+        ssl_session_cache    shared:SSL:1m;
+        ssl_session_timeout  5m;
+
+        #Enable Perfect Forward Secrecy and ciphers without known vulnerabilities
+        #Beware! It breaks compatibility with older OS and browsers (e.g. Windows XP, Android 2.x, etc.)
+	#ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA;
+        #ssl_prefer_server_ciphers  on;
+
+
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+
+        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+        location ~ [^/]\.php(/|$) {
+                fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+                if (!-f $document_root$fastcgi_script_name) {
+                        return 404;
+                }
+                fastcgi_pass 127.0.0.1:9000;
+		#fastcgi_pass unix:/var/run/php-fpm/socket;
+                fastcgi_index index.php;
+                include fastcgi.conf;
+	}
+}
